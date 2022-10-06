@@ -25,8 +25,9 @@ defmodule ChangesetExtras.MixProject do
 
   defp deps do
     [
-      {:ecto_sql, "~> 3.6"},
+      {:brcpfcnpj, "~> 1.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:ecto_sql, "~> 3.6"},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false}
     ]
   end
