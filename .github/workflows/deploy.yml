@@ -2,10 +2,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, reopened, edited, synchronize]
-    branches:
-      - main
 
 name: Format, Test and Deploy
 
@@ -44,6 +40,7 @@ jobs:
           mix local.hex --force
           mix deps.get
           mix deps.compile
+
   format:
     name: Check format
     runs-on: ubuntu-latest
