@@ -24,3 +24,7 @@ changeset_extras-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# IDE files
+/.idea
+changeset_extras.iml

@@ -168,4 +168,28 @@ defmodule ChangesetExtras do
   end
 
   def put_assoc_if_array(changeset, _name, _values, _opts), do: changeset
+
+  @doc """
+  Put document type for a given document (works for CPF/CNPJ)
+  """
+  def put_document_type(changeset, doc_prop, doc_type_prop, opts \\ []) do
+    message = Keyword.get(opts, :message, "Document is neither a valid CPF or CNPJ")
+
+    case get_field(changeset, doc_prop) do
+      value when is_binary(value) ->
+        cond do
+          Brcpfcnpj.cpf_valid?(value) ->
+            change(changeset, Map.put(%{}, doc_type_prop, "CPF"))
+
+          Brcpfcnpj.cnpj_valid?(value) ->
+            change(changeset, Map.put(%{}, doc_type_prop, "CNPJ"))
+
+          true ->
+            add_error(changeset, :document, message, validation: :document)
+        end
+
+      _ ->
+        add_error(changeset, :document, message, validation: :document)
+    end
+  end
 end

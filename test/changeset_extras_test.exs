@@ -48,6 +48,31 @@ defmodule ChangesetExtrasTest do
     end
   end
 
+  defmodule UserTest do
+    @moduledoc """
+    For testing
+    """
+
+    use Ecto.Schema
+    import Ecto.Changeset
+    import ChangesetExtras
+
+    embedded_schema do
+      field(:name, :string)
+      field(:document, :string)
+      field(:document_type, :string)
+    end
+
+    def new_changeset(params \\ %{}), do: changeset(%__MODULE__{}, params)
+
+    def changeset(struct, params) do
+      struct
+      |> cast(params, [:name, :document, :document_type])
+      |> put_document_type(:document, :document_type)
+      |> validate_required([:name, :document, :document_type])
+    end
+  end
+
   describe "validate_enum_transitions/3" do
     test "Validate some transitions" do
       payment = %PaymentTest{status: :pending, resource: "::URL::"}
@@ -104,6 +129,44 @@ defmodule ChangesetExtrasTest do
                ]
              } ==
                traverse_errors(updated_payment_changeset)
+    end
+  end
+
+  describe "put_document_type/4" do
+    test "Add valid CPF to user" do
+      name = "Kakashi Hatake"
+      cpf = "51640724087"
+      user = %UserTest{name: name}
+
+      assert {:ok, %UserTest{name: ^name, document: ^cpf, document_type: "CPF"}} =
+               user
+               |> UserTest.changeset(%{document: cpf})
+               |> Changeset.apply_action(:update)
+    end
+
+    test "Add valid CNPJ to user" do
+      name = "Weasleys' Wizard Wheezes"
+      cnpj = "39133468000190"
+      user = %UserTest{name: name}
+
+      assert {:ok, %UserTest{name: ^name, document: ^cnpj, document_type: "CNPJ"}} =
+               user
+               |> UserTest.changeset(%{document: cnpj})
+               |> Changeset.apply_action(:update)
+    end
+
+    test "Add invalid document to user" do
+      name = "Tyler Durden"
+      cpf = "00000000000"
+      user = %UserTest{name: name}
+
+      assert %Changeset{valid?: false} = changeset = UserTest.changeset(user, %{document: cpf})
+
+      assert %{
+               document: ["Document is neither a valid CPF or CNPJ"],
+               document_type: ["can't be blank"]
+             } ==
+               traverse_errors(changeset)
     end
   end
 end
